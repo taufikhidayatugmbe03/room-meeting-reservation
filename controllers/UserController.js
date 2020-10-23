@@ -1,7 +1,6 @@
 import User from './../models/user.js';
 import express from 'express';
 import bcrypt from 'bcrypt';
-import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
 // import Conf from './../config.js';
 
@@ -31,22 +30,7 @@ userRouter.post('/register', async (req, res) => {
             "password": hashedPw
         });
 
-        const createdUser = await newUser.save();
-        const token = jwt.sign(
-            // payload data
-        {
-            username: user.username,
-            id: user._id
-        },
-        process.env.TOKEN_SECRET,{expiresIn: "2 h"}
-        )
-        res.status(200).json({
-        error: null,
-        data: {
-            token
-        }
-        })
-  
+        const createdUser = await newUser.save();  
         res.status(201).json(createdUser);
 
     }
@@ -68,7 +52,7 @@ userRouter.get('/login', async(req,res)=>{
         username: user.username,
         id: user._id
     },
-    process.env.TOKEN_SECRET,{expiresIn: "12 h"}
+    process.env.TOKEN_SECRET,{expiresIn: "5 m"}
     )
     res.status(200).json({
     error: null,
