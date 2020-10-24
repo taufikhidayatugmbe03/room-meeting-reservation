@@ -21,18 +21,22 @@ userRouter.post('/register', async (req, res) => {
         //digit angka mau berapa banyak
         var saltRounds = 10;
         const hashedPw = await bcrypt.hash(password, saltRounds);
-
-        const newUser = new User({
-            "nama":nama,
-            "username":username,
-            "id_karyawan":id_karyawan,
-            "divisi":divisi,
-            "password": hashedPw
-        });
+        const user = await User.findOne({username})
+        if(user){res.status(400).json({error:"Username sudah digunakan"})
+        return
+        }
+            const newUser = new User({
+                "nama":nama,
+                "username":username,
+                "id_karyawan":id_karyawan,
+                "divisi":divisi,
+                "password": hashedPw
+            });
 
         const createdUser = await newUser.save();  
         res.status(201).json(createdUser);
 
+            
     }
     catch(error){
         res.status(500).json({ error: error})
@@ -66,6 +70,19 @@ userRouter.get('/logout', async(req,res)=>{
   const token = null
   res.status(200).send({ auth: false, token: token });
 })
+
+userRouter.get('/', async(req,res)=>{
+    const user = await User.find({})
+    
+    if(user && user.length !==0) {
+      res.json(user)
+    } else {
+      res.status(404).json({
+        message: 'User tidak di temuka'
+      })
+    }
+  }
+  )
 
 
 
