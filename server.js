@@ -35,7 +35,7 @@ app.get('/', (req, res, next) => {
 app.use('/api/user', userRouter)
 app.use('/api/room',verifytoken, roomRouter)
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`App listens to port ${port}`);
 })

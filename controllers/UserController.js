@@ -3,6 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
+
 // import Conf from './../config.js';
 
 const userRouter = express.Router();
@@ -23,6 +24,11 @@ userRouter.post('/register', async (req, res) => {
         var saltRounds = 10;
         const hashedPw = await bcrypt.hash(password, saltRounds);
 
+        const user = await User.findOne({username})
+        if (user){res.status(400).json({error:"Username already taken"})
+        return
+        }
+
         const newUser = new User({
             "nama":nama,
             "username":username,
@@ -30,6 +36,7 @@ userRouter.post('/register', async (req, res) => {
             "divisi":divisi,
             "password": hashedPw
         });
+
 
         const createdUser = await newUser.save();
         res.status(200).json(createdUser);
@@ -41,27 +48,28 @@ userRouter.post('/register', async (req, res) => {
 })
 userRouter.get('/login', async(req,res)=>{
  
-  const user = await User.findOne({username : req.body.username})
-  console.log(user)
-  if (!user) return res.status(400).json({ error: "Username is wrong" })
-    const validPassword = await bcrypt.compare(req.body.password, user.password)
-    if (!validPassword)
-    return res.status(400).json({ error: "Password is wrong" })
-    const token = jwt.sign(
-        // payload data
-    {
-        username: user.username,
-        id: user._id
-    },
-    process.env.TOKEN_SECRET,{expiresIn: "12 h"}
-    )
-    res.status(200).json({
-    error: null,
-    data: {
-        token
-    }
-    })
-})
+    const user = await User.findOne({username : req.body.username})
+    console.log(user)
+    if (!user) return res.status(400).json({ error: "Username is wrong" })
+      const validPassword = await bcrypt.compare(req.body.password, user.password)
+      if (!validPassword)
+      return res.status(400).json({ error: "Password is wrong" })
+      const token = jwt.sign(
+          // payload data
+      {
+          username: user.username,
+          id: user._id
+      },
+      process.env.TOKEN_SECRET,{expiresIn: "5 m"}
+      )
+      res.status(200).json({
+      error: null,
+      data: {
+          token
+      }
+      })
+  })
+  
 
 userRouter.get('/logout', async(req,res)=>{
   const token = null
@@ -72,7 +80,7 @@ userRouter.get('/logout', async(req,res)=>{
 // app.get('/logout',auth,function(req,res){
 //     req.user.deleteToken(req.token,(err,user)=>{
 //         if(err) return res.status(400).send(err);
-//         res.sendStatus(200);
+//         res.sendStatus(200);cls
 //     });
 
 // }); 
